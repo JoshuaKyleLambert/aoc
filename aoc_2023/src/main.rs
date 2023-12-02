@@ -1,17 +1,23 @@
 //Advent of code Day one
 use std::fs::File;
-use std::io::{prelude, BufRead, BufReader, Read};
+use std::io::{BufRead, BufReader};
 
 fn main() {
-    println!("Hello, world!");
     let mut strings: Vec<String> = Vec::new();
-
+    let mut strings_unchanged: Vec<String> = Vec::new();
     match read_file_to_vec("input.txt") {
-        Ok(strs) => strings = strs,
+        Ok(strs) => {
+            strings = strs.clone();
+            strings_unchanged = strs;
+        }
         Err(error) => print!("{}", error),
     };
+    replace_spelled_numbers(&mut strings);
     remove_letters(&mut strings);
-    println!("{}", sum_strings(&mut strings));
+    println!(
+        "The calculated sum is: {}",
+        sum_strings(&mut strings, &strings_unchanged)
+    );
 }
 
 fn read_file_to_vec(path: &str) -> Result<Vec<String>, std::io::Error> {
@@ -20,16 +26,42 @@ fn read_file_to_vec(path: &str) -> Result<Vec<String>, std::io::Error> {
     reader.lines().collect()
 }
 
+fn replace_spelled_numbers(input: &mut Vec<String>) {
+    for c in input {
+        *c = c
+            .replace("one", "o1e")
+            .replace("two", "t2o")
+            .replace("three", "t3e")
+            .replace("four", "f4r")
+            .replace("five", "f5e")
+            .replace("six", "s6x")
+            .replace("seven", "s7n")
+            .replace("eight", "e8t")
+            .replace("nine", "n9e")
+            .replace("zero", "z0o");
+    }
+}
+
 fn remove_letters(strings: &mut Vec<String>) {
     for c in strings {
         c.retain(|c| c.is_ascii_digit());
     }
 }
 
-fn sum_strings(strings: &mut Vec<String>) -> u32 {
+fn sum_strings(strings: &mut [String], strings_unchanged: &[String]) -> u32 {
     let mut sum: u32 = 0;
-    for c in strings {
-        sum += get_string_value(c);
+    for (i, c) in strings.iter().enumerate() {
+        let value = get_string_value(c);
+        println!(
+            "{}. {} - {} => {} + {} = {}",
+            i + 1,
+            strings_unchanged[i],
+            c,
+            value,
+            sum,
+            sum + value
+        );
+        sum += value;
     }
     sum
 }
