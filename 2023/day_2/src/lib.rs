@@ -200,13 +200,14 @@ mod tests {
     #[test]
     fn test_impossible_game() {
         let line = "Game 1: 4 red, 1 green, 15 blue; 6 green, 2 red, 10 blue; 7 blue, 6 green, 4 red; 12 blue, 10 green, 3 red";
-        let mut game = process_line_into_game(line);
         let limit = BagPull {
             red: 3,
             green: 3,
             blue: 3,
         };
-        game.is_possible(limit);
+        let mut game = process_line_into_game(line, &limit);
+
+        game.is_possible(&limit);
         assert!(!game.possible);
     }
 }
