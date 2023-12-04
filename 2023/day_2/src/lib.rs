@@ -4,18 +4,17 @@ use std::io::{BufRead, BufReader};
 #[derive(Debug, Clone, Default)]
 pub struct Game {
     pub number: u32,
-    pub possible: bool,
     pub pull: Vec<BagPull>,
 }
 
 impl Game {
-    pub fn is_possible(&mut self, limit: &BagPull) {
+    pub fn is_possible(&self, limit: &BagPull) -> bool {
         for pull in self.pull.iter() {
             if pull.red > limit.red || pull.green > limit.green || pull.blue > limit.blue {
-                self.possible = false;
-                break;
+                return false;
             }
         }
+        true
     }
 }
 
@@ -39,42 +38,39 @@ pub fn play_games(limit: &BagPull) -> u32 {
         Err(error) => print!("{}", error),
     };
 
-    let games = process_all_lines_into_games(&strings, limit);
-    sum_possible_games(&games)
+    let games = process_all_lines_into_games(&strings);
+    sum_possible_games(&games, limit)
 }
 
-pub fn sum_possible_games(games: &[Game]) -> u32 {
+pub fn sum_possible_games(games: &[Game], limit: &BagPull) -> u32 {
     let mut sum = 0;
     for game in games.iter() {
-        if game.possible {
+        if game.is_possible(limit) {
             sum += game.number;
         }
     }
     sum
 }
 
-pub fn process_all_lines_into_games(lines: &[String], limit: &BagPull) -> Vec<Game> {
+pub fn process_all_lines_into_games(lines: &[String]) -> Vec<Game> {
     let mut games: Vec<Game> = Vec::new();
     for line in lines.iter() {
-        let game = process_line_into_game(line, limit);
+        let game = process_line_into_game(line);
         games.push(game);
     }
     games
 }
 
-pub fn process_line_into_game(line: &str, limit: &BagPull) -> Game {
+pub fn process_line_into_game(line: &str) -> Game {
     let (game, pulls) = split_into_game_and_pulls(line);
     let game_number = extract_game_number(game);
     let pulls = extract_pulls(pulls);
     let pull_vec = build_bag_pulls_vec(&pulls);
 
-    let mut game = Game {
+    Game {
         number: game_number,
-        possible: true,
         pull: pull_vec,
-    };
-    game.is_possible(limit);
-    game
+    }
 }
 
 pub fn split_into_game_and_pulls(line: &str) -> (&str, &str) {
@@ -185,9 +181,9 @@ mod tests {
             green: 13,
             blue: 14,
         };
-        let game = process_line_into_game(line, &limit);
+        let game = process_line_into_game(line);
         assert_eq!(game.number, 1);
-        assert!(game.possible);
+        assert!(game.is_possible(&limit));
         assert_eq!(game.pull[0].red, 4);
         assert_eq!(game.pull[0].green, 1);
         assert_eq!(game.pull[0].blue, 15);
@@ -205,9 +201,9 @@ mod tests {
             green: 3,
             blue: 3,
         };
-        let mut game = process_line_into_game(line, &limit);
+        let game = process_line_into_game(line);
 
         game.is_possible(&limit);
-        assert!(!game.possible);
+        assert!(!game.is_possible(&limit));
     }
 }
