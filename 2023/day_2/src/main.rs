@@ -9,5 +9,5 @@ fn main() {
         blue: 14,
     };
 
-    println!("Sum of games: {}", play_games(&limit));
+    println!("Game Results: \n{}", play_games(&limit));
 }

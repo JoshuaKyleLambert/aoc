@@ -4,18 +4,49 @@ use std::io::{BufRead, BufReader};
 #[derive(Debug, Clone, Default)]
 pub struct Game {
     pub number: u32,
-    pub pull: Vec<BagPull>,
+    pub pulls: Vec<BagPull>,
 }
 
 impl Game {
-    pub fn is_possible(&self, limit: &BagPull) -> bool {
-        for pull in self.pull.iter() {
+    pub fn is_possible_by_limit(&self, limit: &BagPull) -> bool {
+        for pull in self.pulls.iter() {
             if pull.red > limit.red || pull.green > limit.green || pull.blue > limit.blue {
                 return false;
             }
         }
         true
     }
+
+    pub fn fewest_cubes_needed(&self) -> BagPull {
+        let mut max_colors = BagPull::default();
+
+        for pull in self.pulls.iter() {
+            if pull.red > max_colors.red {
+                max_colors.red = pull.red;
+            }
+            if pull.green > max_colors.green {
+                max_colors.green = pull.green;
+            }
+            if pull.blue > max_colors.blue {
+                max_colors.blue = pull.blue;
+            }
+        }
+
+        max_colors
+    }
+}
+
+pub fn power_of_set(set: &BagPull) -> u32 {
+    set.red * set.green * set.blue
+}
+
+pub fn sum_of_powers_of_games(games: &[Game]) -> u32 {
+    let mut sum = 0;
+    for game in games.iter() {
+        let power = power_of_set(&game.fewest_cubes_needed());
+        sum += power;
+    }
+    sum
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -31,21 +62,31 @@ pub fn read_file_to_vec(path: &str) -> Result<Vec<String>, std::io::Error> {
     reader.lines().collect()
 }
 
-pub fn play_games(limit: &BagPull) -> u32 {
+pub fn play_games(limit: &BagPull) -> String {
     let mut strings: Vec<String> = Vec::new();
     match read_file_to_vec("input.txt") {
         Ok(strs) => strings = strs,
         Err(error) => print!("{}", error),
     };
 
+    let mut results = String::from("Sum of possible games ");
+
     let games = process_all_lines_into_games(&strings);
-    sum_possible_games(&games, limit)
+    let sum = sum_possible_games(&games, limit);
+    results.push_str(sum.to_string().as_str());
+
+    let sum_of_powers = sum_of_powers_of_games(&games);
+
+    results.push_str("\nSum of powers of games ");
+    results.push_str(sum_of_powers.to_string().as_str());
+
+    results
 }
 
 pub fn sum_possible_games(games: &[Game], limit: &BagPull) -> u32 {
     let mut sum = 0;
     for game in games.iter() {
-        if game.is_possible(limit) {
+        if game.is_possible_by_limit(limit) {
             sum += game.number;
         }
     }
@@ -69,7 +110,7 @@ pub fn process_line_into_game(line: &str) -> Game {
 
     Game {
         number: game_number,
-        pull: pull_vec,
+        pulls: pull_vec,
     }
 }
 
@@ -183,14 +224,14 @@ mod tests {
         };
         let game = process_line_into_game(line);
         assert_eq!(game.number, 1);
-        assert!(game.is_possible(&limit));
-        assert_eq!(game.pull[0].red, 4);
-        assert_eq!(game.pull[0].green, 1);
-        assert_eq!(game.pull[0].blue, 15);
-        assert_eq!(game.pull[3].red, 3);
-        assert_eq!(game.pull[3].green, 10);
-        assert_eq!(game.pull[3].blue, 12);
-        assert_eq!(game.pull.len(), 4);
+        assert!(game.is_possible_by_limit(&limit));
+        assert_eq!(game.pulls[0].red, 4);
+        assert_eq!(game.pulls[0].green, 1);
+        assert_eq!(game.pulls[0].blue, 15);
+        assert_eq!(game.pulls[3].red, 3);
+        assert_eq!(game.pulls[3].green, 10);
+        assert_eq!(game.pulls[3].blue, 12);
+        assert_eq!(game.pulls.len(), 4);
     }
 
     #[test]
@@ -203,7 +244,7 @@ mod tests {
         };
         let game = process_line_into_game(line);
 
-        game.is_possible(&limit);
-        assert!(!game.is_possible(&limit));
+        game.is_possible_by_limit(&limit);
+        assert!(!game.is_possible_by_limit(&limit));
     }
 }
