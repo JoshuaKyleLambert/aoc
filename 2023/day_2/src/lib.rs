@@ -1,5 +1,4 @@
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use aoc_library::read_file_to_vec;
 
 #[derive(Debug, Clone, Default)]
 pub struct Game {
@@ -54,12 +53,6 @@ pub struct BagPull {
     pub red: u32,
     pub green: u32,
     pub blue: u32,
-}
-
-pub fn read_file_to_vec(path: &str) -> Result<Vec<String>, std::io::Error> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    reader.lines().collect()
 }
 
 pub fn play_games(limit: &BagPull) -> String {

@@ -1,6 +1,5 @@
 //Advent of code Day one
-use std::fs::File;
-use std::io::{BufRead, BufReader};
+use aoc_library::read_file_to_vec;
 
 fn main() {
     let mut strings: Vec<String> = Vec::new();
@@ -18,12 +17,6 @@ fn main() {
         "The calculated sum is: {}",
         sum_strings(&mut strings, &strings_unchanged)
     );
-}
-
-fn read_file_to_vec(path: &str) -> Result<Vec<String>, std::io::Error> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    reader.lines().collect()
 }
 
 fn replace_spelled_numbers(input: &mut Vec<String>) {
