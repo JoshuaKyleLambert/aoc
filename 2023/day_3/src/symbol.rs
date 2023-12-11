@@ -1,4 +1,6 @@
-#[derive(Default, Debug)]
+use crate::number::Number;
+
+#[derive(Default, Debug, Clone)]
 pub struct Symbol {
     pub pos: (u32, u32),
     pub symbol: char,
@@ -7,7 +9,7 @@ pub struct Symbol {
 #[derive(Default, Debug)]
 pub struct Gear {
     pub symbol: Symbol,
-    pub gears: Vec<u32>,
+    pub gears: Vec<Number>,
 }
 
 impl Gear {
@@ -15,7 +17,7 @@ impl Gear {
         if self.gears.len() == 1 {
             0
         } else {
-            self.gears[0] * self.gears[1]
+            self.gears[0].value * self.gears[1].value
         }
     }
 }

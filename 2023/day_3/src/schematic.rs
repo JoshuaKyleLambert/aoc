@@ -1,4 +1,7 @@
-use crate::{number::Number, symbol::Symbol};
+use crate::{
+    number::Number,
+    symbol::{Gear, Symbol},
+};
 use aoc_library::read_file_to_vec;
 
 #[derive(Default)]
@@ -159,6 +162,32 @@ impl Schematic {
         }
 
         (x >= num_x - sub_x && x <= num_x + number.length) && (y >= num_y - sub_y && y <= num_y + 1)
+    }
+
+    fn filter_for_gear_ratios(&self) -> Vec<Gear> {
+        let mut gears: Vec<Gear> = Vec::new();
+        for gear in &self.all_symbols {
+            if gear.symbol == '*' {
+                gears.push(Gear {
+                    symbol: gear.clone(),
+                    gears: self
+                        .all_numbers
+                        .iter()
+                        .filter(|num| self.symbol_is_next_to_number(gear, num))
+                        .cloned()
+                        .collect(),
+                });
+            }
+        }
+        gears
+    }
+
+    pub fn gear_ratio_sum(&self) -> u32 {
+        let mut sum = 0;
+        for gear in self.filter_for_gear_ratios() {
+            sum += gear.ratio();
+        }
+        sum
     }
 }
 
